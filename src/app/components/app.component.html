@@ -1,0 +1,78 @@
+<div class="jumbotron">
+  <div class="container">
+    <!-- <ngb-alert type="success" [dismissible]="false">
+      Twoje położenie: lat({{lat}}), lng({{lng}})
+    </ngb-alert>
+    <ngb-alert type="success" [dismissible]="false">
+      Wybrano stację: {{ selectedMarker | json }}
+    </ngb-alert> -->
+
+    <h1>
+      <i class="fa fa-map-o" aria-hidden="true"></i>
+      Mapa od Google
+    </h1>
+    <!-- this creates a google map on the page with the given lat/lng from -->
+    <!-- the component as the initial center of the map: -->
+    <agm-map [latitude]="lat" [longitude]="lng">
+      <!-- moja pozycja -->
+      <agm-marker 
+        [latitude]="lat" 
+        [longitude]="lng">
+      </agm-marker>
+
+      <!-- (markerClick)="clickedMarker(m.label, i)"
+        (dragEnd)="markerDragEnd(m, $event)" -->
+        <!-- [iconUrl]="'/assets/icons/favicon-32x32.ico'" -->
+      <agm-marker 
+        *ngFor="let station of (stations$ | async); let i = index"
+        [label]="station.availPorts.toString()"
+        [latitude]="station.pos.lat"
+        [longitude]="station.pos.lng"
+        [markerDraggable]="false"
+        [zIndex]="i"
+        (markerClick)="clickedStation(station)"
+      >
+      </agm-marker>
+    </agm-map>
+  </div>
+</div>
+
+<router-outlet></router-outlet>
+
+
+<!-- <div class="container">
+  <p>
+    A progress bar:
+    <ngb-progressbar showValue="true" type="success" [value]="65">
+    </ngb-progressbar>
+  </p>
+</div>
+
+<div class="container">
+  <ngb-tabset>
+    <ngb-tab title="Bacon">
+        <ng-template ngbTabContent>
+          <p class="mt-4">Content for tab 1.
+            <button type="button"
+                    class="btn btn-secondary"
+                    placement="bottom"
+                    ngbPopover="A popover in tab 1"
+                    popoverTitle="Bacon is good">
+              Click me
+            </button>
+          </p>
+        </ng-template>
+      </ngb-tab>
+      <ngb-tab title="Lettuce">
+        <ng-template ngbTabContent>
+          <p>Content for tab 2</p>
+        </ng-template>
+      </ngb-tab>
+      <ngb-tab title="Tomatoes">
+        <ng-template ngbTabContent>
+          <p>Content for tab 3</p>
+        </ng-template>
+      </ngb-tab>
+    </ngb-tabset>
+</div> -->
+

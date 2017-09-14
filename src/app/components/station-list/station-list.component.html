@@ -1,0 +1,18 @@
+<div class="container">
+  <h2>Lista stacji</h2>
+  <div class="list-group">
+    
+    <a 
+      *ngFor="let station of (stations$ | async)"
+      routerLink="'/station/1" routerLinkActive="active"
+      class="list-group-item list-group-item-action flex-column align-items-start">
+      <div class="d-flex w-100 justify-content-between">
+        <h6 class="mb-1">{{station.$key}}</h6>
+        <h6 class="mb-2">{{station.name}}</h6>
+        <h6>{{station.availPorts}}/{{station.totalPorts}}</h6>
+      </div>
+    </a>
+  </div>
+</div>
+
+  
