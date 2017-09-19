@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FirebaseListObservable } from 'angularfire2/database';
 import { StationsService } from '../../services/stations.service';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-station-list',
@@ -9,7 +10,7 @@ import { StationsService } from '../../services/stations.service';
 })
 export class StationListComponent implements OnInit {
 
-  stations$: FirebaseListObservable<any[]>;
+  stations$: Observable<any[]>;
 
   constructor(
     private stationsService: StationsService

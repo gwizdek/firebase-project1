@@ -13,17 +13,20 @@ import { FirebaseListObservable } from 'angularfire2/database';
 })
 export class AppComponent implements OnInit, OnDestroy {
 
-  lat: number = 50.2530171;
-  lng: number = 19.0179155;
+  viewportLat: number = 50.2530171;
+  viewportLng: number = 19.0179155;
 
-  // private stationClick$ = new Subject();
-  // public obs$ = this.obs.asObservable();
+  myLat: number = 50.2530171;
+  myLng: number = 19.0179155;
 
-  stations$: FirebaseListObservable<any[]>;
-  geoLocation$: Observable<any>;
+  locRefreshCount: number = 0;
+  distance: number = 0;
 
-  // private stations: Marker[];
-  // private selectedStation: Marker;
+  stations$: Observable<any[]>;
+  // stationsDistance$: Observable<any>;
+
+  // subskrypcja pozycji usera
+  locationSubs: Subscription;
 
   constructor(
     private geoService: GeolocationService, 
@@ -32,28 +35,86 @@ export class AppComponent implements OnInit, OnDestroy {
   
   ngOnInit() {
     this.stations$ = this.stationsService.getStations();
-  
-    this.geoLocation$ = this.geoService.getLocation({
-      enableHighAccuracy: true
-    });
+
+    const location$ = this.geoService.observeLocation();
     
-    this.geoLocation$.subscribe( location => {
-      this.lat = location.coords.latitude;
-      this.lng = location.coords.longitude;
-    });
-
-    // this.stationClick$.subscribe( station => {
-    //   console.log(station);
-    // });
+    // jeden raz na początku ustawiamy viewport na obecne położenie
+    location$.take(1).subscribe( 
+      location => {
+        this.viewportLat = location.coords.latitude;
+        this.viewportLng = location.coords.longitude;
+      }, 
+      err => {},
+      () => {
+        console.log("Pobrano pierwszą lokalizację");
+      }
+    );
+    
+    // nasłuchujemy odczytów pozycji w przeglądarce. Jak często pozycja jest odświeżana
+    // zależy od samej przeglądarki (z GPS jest szybciej)
+    this.locationSubs = location$.subscribe(
+      location => {
+        this.locRefreshCount++;
+        this.myLat = location.coords.latitude;
+        this.myLng = location.coords.longitude;
+      },
+      err => {
+        console.log(err);
+      },
+      () => {
+        console.log("completed!");
+      }
+    );
   }
-
+  
   ngOnDestroy() {
-
+    this.locationSubs.unsubscribe();
   }
 
   clickedStation(station) {
     console.log(station);
     // this.selectedMarker = this.markers[i];
   }
+
+  clickedStartLocation() {
+    // if (!this.geoLocationTimerSubs) {
+    //   this.geoLocationTimerSubs = this.location$.subscribe(
+    //     location => {
+    //       // console.log(location);
+    //       this.locRefreshCount++;
+    //       this.myLat = location.coords.latitude;
+    //       this.myLng = location.coords.longitude;
+    //     },
+    //     err => {
+    //       console.log(err);
+    //     },
+    //     () => {
+    //       console.log("completed!");
+    //     }
+    //   );
+    // }
+  }
+  
+  clickedStopLocation() {
+    // this.geoService.stopObservingLocation();
+  }
+
+  private getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+		var R = 6371; // Radius of the earth in km
+		var dLat = this.deg2rad(lat2-lat1);  // deg2rad below
+		var dLon = this.deg2rad(lon2-lon1); 
+		var a = 
+			Math.sin(dLat/2) * Math.sin(dLat/2) +
+			Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
+			Math.sin(dLon/2) * Math.sin(dLon/2)
+			; 
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var d = R * c; // Distance in km
+		return d;
+	}
+	
+	private deg2rad(deg) {
+		return deg * (Math.PI/180)
+	}
 
 }

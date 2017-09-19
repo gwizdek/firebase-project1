@@ -1,3 +1,4 @@
+import { GeolocationService } from './geolocation.service';
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
@@ -6,11 +7,27 @@ import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/databa
 @Injectable()
 export class StationsService {
 
-  constructor(private db: AngularFireDatabase) { 
+  constructor(
+		private db: AngularFireDatabase,
+		private geolocationService: GeolocationService
+	) { 
   }
 
-  public getStations() : FirebaseListObservable<any[]> {
-    return this.db.list('/stations');
+  public getStations() : Observable<any[]> {
+		return this.db.list('/stations')
+			.combineLatest(this.geolocationService.observeLocation())
+			.map(locPos => 
+				locPos[0].map(marker =>
+					Object.assign(marker, {
+						distance: this.getDistanceFromLatLonInKm(
+							locPos[1].coords.latitude, 
+							locPos[1].coords.longitude,
+							marker.pos.lat,
+							marker.pos.lng
+						)
+					})
+				)
+			);
 	}
 	
 	private getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {

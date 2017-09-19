@@ -41,7 +41,12 @@ import { StationDetailComponent } from './components/station-detail/station-deta
       {
         path: 'stations',
         component: StationListComponent
-      }
+      },
+      {
+        path: '**',
+        redirectTo: '/stations',
+        pathMatch: 'full'
+      },
     ])
   ],
   providers: [

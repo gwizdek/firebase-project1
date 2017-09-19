@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Injectable, OnInit, OnDestroy} from '@angular/core';
+import {Observable, Subscription, BehaviorSubject, Subject} from 'rxjs';
 
 const GEOLOCATION_ERRORS = {
 	'errors.location.unsupportedBrowser': 'Browser does not support location services',
@@ -8,55 +8,56 @@ const GEOLOCATION_ERRORS = {
 	'errors.location.timeout': 'Service timeout has been reached'
 };
 
+const locationConfig = {
+	refreshRate: 2000,
+
+	enableHighAccuracy: true
+};
+
 @Injectable()
-export class GeolocationService {
+export class GeolocationService implements OnInit, OnDestroy {
 
-	/**
-	 * Obtains the geographic position, in terms of latitude and longitude coordinates, of the device.
-	 * @param {Object} [opts] An object literal to specify one or more of the following attributes and desired values:
-	 *   - enableHighAccuracy: Specify true to obtain the most accurate position possible, or false to optimize in favor of performance and power consumption.
-	 *   - timeout: An Integer value that indicates the time, in milliseconds, allowed for obtaining the position.
-	 *              If timeout is Infinity, (the default value) the location request will not time out.
-	 *              If timeout is zero (0) or negative, the results depend on the behavior of the location provider.
-	 *   - maximumAge: An Integer value indicating the maximum age, in milliseconds, of cached position information.
-	 *                 If maximumAge is non-zero, and a cached position that is no older than maximumAge is available, the cached position is used instead of obtaining an updated location.
-	 *                 If maximumAge is zero (0), watchPosition always tries to obtain an updated position, even if a cached position is already available.
-	 *                 If maximumAge is Infinity, any cached position is used, regardless of its age, and watchPosition only tries to obtain an updated position if no cached position data exists.
-	 * @returns {Observable} An observable sequence with the geographical location of the device running the client.
-	 */
-	public getLocation(opts): Observable<any> {
+		// ident 
+		private watchId = null;
+		private location$: Subject<any>;
+		private counter = 0;
 
-		return Observable.create(observer => {
+		constructor() {
+			this.location$ = new Subject<any>();
 
 			if (window.navigator && window.navigator.geolocation) {
-				window.navigator.geolocation.getCurrentPosition(
+				this.watchId = window.navigator.geolocation.watchPosition(
 					(position) => {
-						observer.next(position);
-            observer.complete();
+						// console.log(`watch ID: ${this.watchId}, Counter: ${++this.counter}`);
+						this.location$.next(position);
 					},
 					(error) => {
 						switch (error.code) {
 							case 1:
-								observer.error(GEOLOCATION_ERRORS['errors.location.permissionDenied']);
-								break;
+							this.location$.error(GEOLOCATION_ERRORS['errors.location.permissionDenied']);
+							break;
 							case 2:
-								observer.error(GEOLOCATION_ERRORS['errors.location.positionUnavailable']);
-								break;
+							this.location$.error(GEOLOCATION_ERRORS['errors.location.positionUnavailable']);
+							break;
 							case 3:
-								observer.error(GEOLOCATION_ERRORS['errors.location.timeout']);
-								break;
+							this.location$.error(GEOLOCATION_ERRORS['errors.location.timeout']);
+							break;
 						}
-					},
-					opts);
+				});
+			} else {
+				this.location$.error(GEOLOCATION_ERRORS['errors.location.unsupportedBrowser']);
 			}
-			else {
-				observer.error(GEOLOCATION_ERRORS['errors.location.unsupportedBrowser']);
-			}
+		}
 
-		});
-	}
+		ngOnInit() {
+		}
+			
+		ngOnDestroy() {
+			console.log('DESTR');
+			navigator.geolocation.clearWatch(this.watchId);
+		}
+			
+		public observeLocation() : Observable<any> {
+			return this.location$;
+		}
 }
-
-// export var geolocationServiceInjectables: Array<any> = [
-//   provide(GeolocationService, { useClass: GeolocationService })
-// ];
