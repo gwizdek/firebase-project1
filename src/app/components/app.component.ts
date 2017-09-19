@@ -1,9 +1,12 @@
 import { StationsService } from '../services/stations.service';
 import { GeolocationService } from '../services/geolocation.service';
 import { Component, OnInit, OnDestroy} from '@angular/core';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
 import { Station } from '../interfaces/station.interface';
 import { FirebaseListObservable } from 'angularfire2/database';
+
+import 'rxjs/add/operator/take';
 
 
 @Component({
@@ -13,14 +16,14 @@ import { FirebaseListObservable } from 'angularfire2/database';
 })
 export class AppComponent implements OnInit, OnDestroy {
 
-  viewportLat: number = 50.2530171;
-  viewportLng: number = 19.0179155;
+  viewportLat = 50.2530171;
+  viewportLng = 19.0179155;
 
-  myLat: number = 50.2530171;
-  myLng: number = 19.0179155;
+  myLat = 50.2530171;
+  myLng = 19.0179155;
 
-  locRefreshCount: number = 0;
-  distance: number = 0;
+  locRefreshCount = 0;
+  distance = 0;
 
   stations$: Observable<any[]>;
   // stationsDistance$: Observable<any>;
@@ -29,27 +32,27 @@ export class AppComponent implements OnInit, OnDestroy {
   locationSubs: Subscription;
 
   constructor(
-    private geoService: GeolocationService, 
+    private geoService: GeolocationService,
     private stationsService: StationsService
   ) {}
-  
+
   ngOnInit() {
     this.stations$ = this.stationsService.getStations();
 
     const location$ = this.geoService.observeLocation();
-    
+
     // jeden raz na początku ustawiamy viewport na obecne położenie
-    location$.take(1).subscribe( 
+    location$.take(2).subscribe(
       location => {
         this.viewportLat = location.coords.latitude;
         this.viewportLng = location.coords.longitude;
-      }, 
+      },
       err => {},
       () => {
-        console.log("Pobrano pierwszą lokalizację");
+        console.log('Pobrano pierwszą lokalizację');
       }
     );
-    
+
     // nasłuchujemy odczytów pozycji w przeglądarce. Jak często pozycja jest odświeżana
     // zależy od samej przeglądarki (z GPS jest szybciej)
     this.locationSubs = location$.subscribe(
@@ -62,11 +65,11 @@ export class AppComponent implements OnInit, OnDestroy {
         console.log(err);
       },
       () => {
-        console.log("completed!");
+        console.log('completed!');
       }
     );
   }
-  
+
   ngOnDestroy() {
     this.locationSubs.unsubscribe();
   }
@@ -75,46 +78,4 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log(station);
     // this.selectedMarker = this.markers[i];
   }
-
-  clickedStartLocation() {
-    // if (!this.geoLocationTimerSubs) {
-    //   this.geoLocationTimerSubs = this.location$.subscribe(
-    //     location => {
-    //       // console.log(location);
-    //       this.locRefreshCount++;
-    //       this.myLat = location.coords.latitude;
-    //       this.myLng = location.coords.longitude;
-    //     },
-    //     err => {
-    //       console.log(err);
-    //     },
-    //     () => {
-    //       console.log("completed!");
-    //     }
-    //   );
-    // }
-  }
-  
-  clickedStopLocation() {
-    // this.geoService.stopObservingLocation();
-  }
-
-  private getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-		var R = 6371; // Radius of the earth in km
-		var dLat = this.deg2rad(lat2-lat1);  // deg2rad below
-		var dLon = this.deg2rad(lon2-lon1); 
-		var a = 
-			Math.sin(dLat/2) * Math.sin(dLat/2) +
-			Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
-			Math.sin(dLon/2) * Math.sin(dLon/2)
-			; 
-		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-		var d = R * c; // Distance in km
-		return d;
-	}
-	
-	private deg2rad(deg) {
-		return deg * (Math.PI/180)
-	}
-
 }

@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { RouterModule }   from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AgmCoreModule } from '@agm/core';
@@ -9,8 +10,8 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './components/app.component';
-import { GeolocationService } from "./services/geolocation.service";
-import { StationsService } from "./services/stations.service";
+import { GeolocationService } from './services/geolocation.service';
+import { StationsService } from './services/stations.service';
 import { StationListComponent } from './components/station-list/station-list.component';
 import { StationDetailComponent } from './components/station-detail/station-detail.component';
 
@@ -23,6 +24,7 @@ import { StationDetailComponent } from './components/station-detail/station-deta
   imports: [
     NgbModule.forRoot(),
     BrowserModule,
+    FormsModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
     AgmCoreModule.forRoot({
@@ -34,9 +36,9 @@ import { StationDetailComponent } from './components/station-detail/station-deta
         redirectTo: '/stations',
         pathMatch: 'full'
       },
-      { 
+      {
         path: 'station/:id',
-        component: StationDetailComponent 
+        component: StationDetailComponent
       },
       {
         path: 'stations',
