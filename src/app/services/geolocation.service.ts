@@ -14,7 +14,7 @@ const GEOLOCATION_ERRORS = {
 };
 
 const locationConfig = {
-  efreshRate: 2000,
+  refreshRate: 2000,
   enableHighAccuracy: true
 };
 
@@ -37,7 +37,7 @@ export class GeolocationService implements OnInit, OnDestroy {
       if (window.navigator && window.navigator.geolocation) {
         this.watchId = window.navigator.geolocation.watchPosition(
           (position) => {
-            // console.log(`watch ID: ${this.watchId}, Counter: ${++this.counter}`);
+            console.log(`watch ID: ${this.watchId}, Counter: ${++this.counter}`);
             this.location$.next(position);
           },
           (error) => {

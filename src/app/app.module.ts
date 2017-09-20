@@ -28,7 +28,7 @@ import { StationDetailComponent } from './components/station-detail/station-deta
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
     AgmCoreModule.forRoot({
-      apiKey: 'AIzaSyBaDpJZKlzAMUHxY3H9UXzwkbkZeLCTexc'
+      apiKey: environment.googleMapsKey
     }),
     RouterModule.forRoot([
       {
