@@ -49,7 +49,7 @@ export class StationListComponent implements OnInit {
 
   ngOnInit() {
     console.log('StationListComponent - ngOnInit');
-    this.stations$ = this.stationsService.getStations(2);
+    this.stations$ = this.stationsService.getStationsWithDistance(3);
   }
 
 }

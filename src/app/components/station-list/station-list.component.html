@@ -20,7 +20,7 @@
   <div class="list-group">
     <a 
       *ngFor="let station of (stations$ | async)"
-      routerLink="/station/1" routerLinkActive="active"
+      [routerLink]="'/station/' + station.$key" routerLinkActive="active"
       class="list-group-item list-group-item-action flex-column align-items-start">
       <div class="d-flex w-100 justify-content-between">
         <h6 class="mb-2">{{station.name}}</h6>

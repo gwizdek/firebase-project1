@@ -17,7 +17,7 @@
   <!-- (markerClick)="clickedMarker(m.label, i)"
     (dragEnd)="markerDragEnd(m, $event)" -->
     <!-- [iconUrl]="'/assets/icons/favicon-32x32.ico'" -->
-  <!-- <agm-marker 
+  <agm-marker 
     *ngFor="let station of (stations$ | async); let i = index"
     [label]="station.availPorts.toString()"
     [latitude]="station.pos.lat"
@@ -26,32 +26,8 @@
     [zIndex]="i"
     (markerClick)="clickedStation(station)"
   >
-  </agm-marker> -->
-
-  <agm-marker 
-    *ngFor="let station of (geofireStations$ | async); let i = index"
-    [label]="x"
-    [latitude]="station.location[0]"
-    [longitude]="station.location[1]"
-    [markerDraggable]="false"
-    [zIndex]="i"
-  >
   </agm-marker>
-
 </agm-map>
-<button class="btn btn-outline-success" type="button" 
-  (click)="changeDummyLocationFar()">Far</button>
-<button class="btn btn-outline-success" type="button" 
-  (click)="changeDummyLocationNear()">Near</button>
-
-lat: {{myLat}} long: {{myLng}}
-<!-- <button class="btn btn-outline-success" type="button" (click)="clickedStartLocation()">Start Location</button>
-<button class="btn btn-outline-success" type="button" (click)="clickedStopLocation()">Stop Location</button>
-<p>LOC refresh count: {{locRefreshCount}}</p>
-<p>Distance: {{distance}}</p>
-<p>Subs: {{geoLocationTimerSubs}}</p> -->
-
-<!-- routerLink="/station/1" routerLinkActive="active" -->
 
 <br>
 <router-outlet></router-outlet>

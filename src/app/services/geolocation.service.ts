@@ -37,7 +37,7 @@ export class GeolocationService implements OnInit, OnDestroy {
       if (window.navigator && window.navigator.geolocation) {
         this.watchId = window.navigator.geolocation.watchPosition(
           (position) => {
-            console.log(`watch ID: ${this.watchId}, Counter: ${++this.counter}`);
+            // console.log(`watch ID: ${this.watchId}, Counter: ${++this.counter}`);
             this.location$.next(position);
           },
           (error) => {
@@ -52,7 +52,7 @@ export class GeolocationService implements OnInit, OnDestroy {
               this.location$.error(GEOLOCATION_ERRORS['errors.location.timeout']);
               break;
             }
-        });
+        }, locationConfig);
       } else {
         this.location$.error(GEOLOCATION_ERRORS['errors.location.unsupportedBrowser']);
       }

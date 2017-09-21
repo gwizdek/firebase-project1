@@ -29,15 +29,40 @@ export class StationsService {
     this.getLocations(50, [19, 50]);
   }
 
-  public getStations(rowNo?: number): Observable<any[]> {
-    return this.db.list('/stations', {
-      query: {
-        limitToFirst: rowNo
-      }
-    })
+  public getStationDetails(stationId: number) {
+    return this.db.object(`/stations/${stationId}`)
       .combineLatest(this.geolocationService.observeLocation())
       .map(locPos =>
-        locPos[0].map(marker =>
+        Object.assign(locPos[0], {
+          distance: this.getDistanceFromLatLonInKm(
+            locPos[1].coords.latitude,
+            locPos[1].coords.longitude,
+            locPos[0].pos.lat,
+            locPos[0].pos.lng
+          ),
+          myPos: {
+            latitude: locPos[1].coords.latitude,
+            longitude: locPos[1].coords.longitude
+          },
+          navLink: `https://www.google.com/maps/dir/?api=1&origin=${locPos[1].coords.latitude},${locPos[1].coords.longitude}&destination=${locPos[0].pos.lat},${locPos[0].pos.lng}&travelmode=driving`
+        })
+      );
+  }
+
+  public getStations(rowNo?: number): Observable<any[]> {
+    return this.db.list('/stations')
+      // .do(()=> console.log('getStations'))
+      ;
+  }
+
+  public getStationsWithDistance(rowNo?: number): Observable<any[]> {
+    return this.getStations()
+    .combineLatest(this.geolocationService.observeLocation())
+    // .do(()=> console.log('Station-GeoLocation'))
+    // .do((geoloc)=> console.log(geoloc))
+    .map(locPos =>
+      locPos[0]
+        .map(marker =>
           Object.assign(marker, {
             distance: this.getDistanceFromLatLonInKm(
               locPos[1].coords.latitude,
@@ -47,12 +72,15 @@ export class StationsService {
             )
           })
         )
-      );
+        .sort((stationA, stationB) => stationA.distance - stationB.distance)
+        .slice(0, rowNo ? rowNo : 10)
+    );
   }
 
   public findStationByName(term: string): Observable<string[]> {
     return this.getStations()
       .take(1)
+      // .do(() => console.log('findStationByName'))
       .map(stations => stations
         .map(station => station.name)
         .filter(station =>
@@ -61,6 +89,8 @@ export class StationsService {
       );
   }
 
+
+  ///////////////////////////////////////////////////////////////////////////
   /// Adds GeoFire data to database
   setLocation(key: string, coords: Array<number>) {
     this.geoFire.set(key, coords)
@@ -104,6 +134,7 @@ export class StationsService {
       this.hits.next(currentHits.filter((x) => x.$key !== key));
     });
   }
+  ///////////////////////////////////////////////////////////////////////////
 
   private getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371; // Radius of the earth in km
