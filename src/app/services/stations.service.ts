@@ -2,6 +2,7 @@ import { GeolocationService } from './geolocation.service';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Injectable } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import * as GeoFire from 'geofire';
 
@@ -21,7 +22,8 @@ export class StationsService {
 
   constructor(
     private db: AngularFireDatabase,
-    private geolocationService: GeolocationService
+    private geolocationService: GeolocationService,
+    private sanitizer: DomSanitizer
   ) {
     this.dbRef = this.db.list('/locations');
     this.geoFire = new GeoFire(this.dbRef.$ref);
@@ -44,7 +46,9 @@ export class StationsService {
             latitude: locPos[1].coords.latitude,
             longitude: locPos[1].coords.longitude
           },
-          navLink: `https://www.google.com/maps/dir/?api=1&origin=${locPos[1].coords.latitude},${locPos[1].coords.longitude}&destination=${locPos[0].pos.lat},${locPos[0].pos.lng}&travelmode=driving`
+          navLink: this.sanitizer.bypassSecurityTrustUrl(`google.navigation:q=${locPos[0].pos.lat},${locPos[0].pos.lng}`),
+          geoLink: this.sanitizer.bypassSecurityTrustUrl(`http://maps.apple.com/maps?saddr=Current%20Location&daddr=${locPos[0].pos.lat},${locPos[0].pos.lng}`)
+
         })
       );
   }
